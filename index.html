@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- MQTT.js client library -->
   <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+  <!-- Tesseract.js for client-side OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -64,7 +66,43 @@
 
           <!-- 📝 語詞設定 -->
           <div id="words-input-container" class="setup-sub-container mt-4">
-            <label class="form-label">輸入語詞 (用逗號隔開)：</label>
+            <!-- 教材範本快速載入 -->
+            <div class="form-group mb-3">
+              <label class="form-label">📋 選擇課本與教學範本詞彙 (快速載入)：</label>
+              <select class="form-select" id="setup-preset-words" onchange="loadPresetWords(this.value)">
+                <option value="" selected>-- 點選自動填入詞彙範本 --</option>
+                <option value="math_terms">📐 國小數學名詞 (因數、倍數、長方體、百分率、對稱軸等)</option>
+                <option value="mandarin_l1">📖 國語課本：第一課生字 (手, 足, 口, 耳, 目, 語, 言, 自, 由)</option>
+                <option value="mandarin_l2">📖 國語課本：第二課生字 (春, 夏, 秋, 冬, 花, 草, 山, 石, 田, 水)</option>
+                <option value="english_fruits">🍎 英語常用單字 (Apple, Banana, Orange, Watermelon, Grape, Cherry)</option>
+                <option value="english_animals">🦁 英語常用單字 (Lion, Tiger, Bear, Rabbit, Monkey, Elephant, Zebra)</option>
+                <option value="special_edu_cognitive">🧸 特教生活認知 (杯子, 牙刷, 衣服, 書包, 鞋子, 椅子, 桌子, 湯匙)</option>
+              </select>
+            </div>
+
+            <!-- 課本圖片 OCR 辨識生字 -->
+            <div class="form-group mb-3">
+              <label class="form-label">📸 上傳課本圖片自動辨識生字 (無須手打)：</label>
+              <div class="ocr-upload-area" onclick="triggerOcrUpload()">
+                <div class="ocr-upload-placeholder">
+                  <span>📂 點擊選擇課本照片或開啟相機拍照</span>
+                </div>
+                <input type="file" id="ocr-file-input" accept="image/*" style="display: none;" onchange="handleOcrFile(event)">
+              </div>
+              
+              <!-- OCR Progress & Status -->
+              <div id="ocr-status-container" class="ocr-status-box" style="display: none;">
+                <div class="ocr-status-header">
+                  <span id="ocr-status-text">載入辨識引擎中...</span>
+                  <span id="ocr-percentage">0%</span>
+                </div>
+                <div class="ocr-progress-bar">
+                  <div id="ocr-progress-fill" class="ocr-progress-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <label class="form-label">自訂語詞內容 (用逗號隔開)：</label>
             <textarea class="custom-word-input" id="setup-custom-words" placeholder="例如：蘋果, 香蕉, 橘子, 西瓜..."></textarea>
           </div>
 

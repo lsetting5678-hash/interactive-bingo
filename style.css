@@ -339,7 +339,9 @@ body {
 /* Bingo Grid (Student Board) */
 .bingo-board-container {
   width: 100%;
+  max-width: min(100%, 55vh);
   aspect-ratio: 1;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -363,7 +365,7 @@ body {
   align-items: center;
   text-align: center;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: clamp(0.6rem, 2.5vw, 1.1rem);
   padding: 4px;
   cursor: pointer;
   user-select: none;
@@ -730,5 +732,105 @@ body {
 .mt-2 {
   margin-top: 8px;
 }
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+/* OCR Upload Area Styling */
+.ocr-upload-area {
+  border: 3px dashed var(--border-color);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+.ocr-upload-area:hover {
+  background: #f1f5f9;
+  border-color: var(--primary-accent);
+}
+.ocr-upload-placeholder {
+  font-weight: 700;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+/* OCR Progress & Status Box */
+.ocr-status-box {
+  background: #f0fdf4;
+  border: 3px solid #86efac;
+  border-radius: 16px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.ocr-status-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #166534;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+.ocr-progress-bar {
+  background: #e2e8f0;
+  height: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ocr-progress-fill {
+  background: var(--success-color);
+  height: 100%;
+  width: 0%;
+  transition: width 0.2s ease;
+}
+
+/* Responsive Scaling for Cards in low height viewports */
+@media (max-height: 720px) {
+  body {
+    padding: 8px;
+  }
+  .card {
+    padding: 16px 16px 12px 16px;
+    border-radius: 20px;
+    border-width: 3px;
+  }
+  .title {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+  }
+  .form-group {
+    margin-bottom: 10px;
+  }
+  .form-label {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .form-input, .form-select, .student-count-input {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border-width: 3px;
+  }
+  .btn {
+    padding: 10px 16px;
+    font-size: 1.1rem;
+    border-width: 3px;
+  }
+  .last-drawn-display {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-width: 3px;
+  }
+  .last-drawn-word {
+    font-size: 1.6rem;
+  }
+}
+
 
 

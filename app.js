@@ -881,3 +881,126 @@ function animateConfetti() {
   });
   animationFrameId = requestAnimationFrame(animateConfetti);
 }
+
+// ==========================================
+// 教科書生字範本與 OCR 影像辨識邏輯
+// ==========================================
+
+const PRESET_VOCABULARY = {
+  math_terms: ["因數", "倍數", "公因數", "公倍數", "長方體", "正方體", "表面積", "體積", "百分率", "折線圖", "對稱軸", "對稱點", "線對稱", "質數", "合數", "互質", "最大公因數", "最小公倍數", "最簡分數", "等值分數", "擴分", "約分", "通分", "真分數", "假分數"],
+  mandarin_l1: ["手", "足", "口", "耳", "目", "語", "言", "自", "由", "大", "家", "好", "開", "心", "上", "學", "讀", "書", "寫", "字", "畫", "圖", "朋", "友", "玩"],
+  mandarin_l2: ["春", "夏", "秋", "冬", "花", "草", "山", "石", "田", "水", "天", "地", "人", "日", "月", "風", "雨", "雷", "電", "雲", "霧", "雪", "霜", "冰", "川"],
+  english_fruits: ["Apple", "Banana", "Orange", "Watermelon", "Grape", "Cherry", "Strawberry", "Pineapple", "Mango", "Peach", "Pear", "Lemon", "Lime", "Coconut", "Kiwi", "Melon", "Papaya", "Plum", "Fig", "Guava", "Avocado", "Blueberry", "Raspberry", "Tomato", "Lychee"],
+  english_animals: ["Lion", "Tiger", "Bear", "Rabbit", "Monkey", "Elephant", "Zebra", "Giraffe", "Hippopotamus", "Kangaroo", "Panda", "Koala", "Fox", "Wolf", "Deer", "Squirrel", "Dog", "Cat", "Mouse", "Sheep", "Cow", "Horse", "Pig", "Chicken", "Duck"],
+  special_edu_cognitive: ["杯子", "牙刷", "衣服", "書包", "鞋子", "椅子", "桌子", "湯匙", "筷子", "碗", "盤子", "床", "枕頭", "棉被", "毛巾", "肥皂", "鏡子", "梳子", "電視", "電話", "冰箱", "電風扇", "時鐘", "門", "窗戶"]
+};
+
+function loadPresetWords(presetKey) {
+  const textarea = document.getElementById("setup-custom-words");
+  if (!textarea) return;
+  if (!presetKey) {
+    textarea.value = "";
+    return;
+  }
+  const words = PRESET_VOCABULARY[presetKey];
+  if (words) {
+    textarea.value = words.join(", ");
+  }
+}
+
+function triggerOcrUpload() {
+  const fileInput = document.getElementById("ocr-file-input");
+  if (fileInput) {
+    fileInput.click();
+  }
+}
+
+async function handleOcrFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const statusContainer = document.getElementById("ocr-status-container");
+  const statusText = document.getElementById("ocr-status-text");
+  const progressFill = document.getElementById("ocr-progress-fill");
+  const percentageText = document.getElementById("ocr-percentage");
+  const textarea = document.getElementById("setup-custom-words");
+
+  if (statusContainer) statusContainer.style.display = "block";
+  if (statusText) statusText.textContent = "載入辨識引擎中...";
+  if (progressFill) progressFill.style.width = "0%";
+  if (percentageText) percentageText.textContent = "0%";
+
+  try {
+    // Perform recognition using Tesseract.js
+    const result = await Tesseract.recognize(
+      file,
+      'chi_tra+eng', // Traditional Chinese + English
+      {
+        logger: m => {
+          console.log(m);
+          if (m.status === 'recognizing text') {
+            const percentage = Math.round(m.progress * 100);
+            if (statusText) statusText.textContent = "正在辨識圖片生字中...";
+            if (progressFill) progressFill.style.width = percentage + "%";
+            if (percentageText) percentageText.textContent = percentage + "%";
+          } else if (m.status === 'loading tesseract core' || m.status === 'initializing api') {
+            if (statusText) statusText.textContent = "初始化繁中/英文辨識引擎...";
+            if (progressFill) progressFill.style.width = "20%";
+            if (percentageText) percentageText.textContent = "20%";
+          }
+        }
+      }
+    );
+
+    const text = result.data.text;
+    console.log("OCR Extracted Text:", text);
+
+    // Filter and clean extracted text
+    const regex = /[\s,，.。;；!！?？、()（）\-\[\]{}<>\"\'\\\/]+/g;
+    const rawTokens = text.split(regex);
+    
+    // Filter tokens: keep Chinese characters (1-8 chars) and English words (2-12 chars)
+    const cleanedWords = [];
+    rawTokens.forEach(token => {
+      const cleanToken = token.trim();
+      if (!cleanToken) return;
+      
+      // If it is Chinese characters
+      if (/^[\u4e00-\u9fa5]{1,8}$/.test(cleanToken)) {
+        cleanedWords.push(cleanToken);
+      }
+      // If it is English words
+      else if (/^[A-Za-z]{2,12}$/.test(cleanToken)) {
+        cleanedWords.push(cleanToken);
+      }
+    });
+
+    // Remove duplicates
+    const uniqueWords = [...new Set(cleanedWords)];
+
+    if (uniqueWords.length === 0) {
+      alert("圖片中未偵測到足夠的生字，請重新拍攝清晰、正向的課本文字照片！");
+      if (statusText) statusText.textContent = "辨識失敗。";
+    } else {
+      if (statusText) statusText.textContent = `成功辨識出 ${uniqueWords.length} 個生字！`;
+      if (progressFill) progressFill.style.width = "100%";
+      if (percentageText) percentageText.textContent = "100%";
+      
+      // Append values in textarea
+      if (textarea) {
+        if (textarea.value.trim()) {
+          textarea.value += ", " + uniqueWords.join(", ");
+        } else {
+          textarea.value = uniqueWords.join(", ");
+        }
+      }
+    }
+  } catch (error) {
+    console.error("OCR Error:", error);
+    alert("生字辨識發生錯誤，請檢查網路是否通暢並重試！");
+    if (statusText) statusText.textContent = "辨識發生錯誤。";
+  } finally {
+    // Reset file input value so same file can be uploaded again
+    event.target.value = "";
+  }
+}
