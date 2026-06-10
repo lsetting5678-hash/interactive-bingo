@@ -272,28 +272,16 @@ function startBingoGame() {
   // Initialize teacher game UI
   document.getElementById("game-student-count-t").textContent = `學生人數: ${Object.keys(teacherStudents).length}人`;
   document.getElementById("last-drawn-word").textContent = "---";
-  
-  // Render word pool grid for manual select
-  const grid = document.getElementById("teacher-word-pool-grid");
-  grid.innerHTML = "";
-  teacherWordPool.forEach(word => {
-    const item = document.createElement("div");
-    item.className = "word-pool-item";
-    item.textContent = word;
-    item.onclick = () => drawWordManual(word, item);
-    grid.appendChild(item);
-  });
 
   updateRankingList();
   navigateTo("screen-teacher-game");
 }
 
-// Draw a word manually (by clicking on it in pool list)
-function drawWordManual(word, element) {
+// Draw a word
+function drawWord(word) {
   if (teacherDrawnWords.includes(word)) return; // already drawn
   
   teacherDrawnWords.push(word);
-  element.classList.add("drawn");
   document.getElementById("last-drawn-word").textContent = word;
 
   // Broadcast drawn word
@@ -311,17 +299,7 @@ function drawWordRandomly() {
     return;
   }
   const randomWord = undrawn[Math.floor(Math.random() * undrawn.length)];
-  
-  // Find element and call draw manual
-  const items = document.querySelectorAll(".word-pool-item");
-  let targetEl = null;
-  items.forEach(el => {
-    if (el.textContent === randomWord) targetEl = el;
-  });
-
-  if (targetEl) {
-    drawWordManual(randomWord, targetEl);
-  }
+  drawWord(randomWord);
 }
 
 // Update the live score ranking board for the teacher
