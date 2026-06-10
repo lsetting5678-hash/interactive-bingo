@@ -24,6 +24,8 @@ let studentMarkedIndices = new Set(); // indices of cells clicked by student
 let studentDrawnWords = new Set(); // words drawn by teacher
 let studentHasWon = false;
 let studentHasFreeSpace = false;
+let studentLastReportedLines = -1;
+let studentLastReportedBingo = false;
 
 // Standard Word Pools & Themes
 const WORD_POOLS = {
@@ -497,6 +499,8 @@ function joinRoom() {
   studentMarkedIndices.clear();
   studentDrawnWords.clear();
   studentHasWon = false;
+  studentLastReportedLines = -1;
+  studentLastReportedBingo = false;
 
   // Connect to MQTT Broker
   connectMQTT(() => {
@@ -653,13 +657,18 @@ function calculateLinesAndReport() {
     document.getElementById("bingo-modal").classList.add("active");
   }
 
-  // Report status to teacher
-  publishMessage(`bingo/${roomId}/student_status`, {
-    id: mqttClient.options.clientId,
-    name: username,
-    lines: linesCount,
-    bingo: isBingo
-  });
+  // Only report status to teacher if lines count or bingo status has changed
+  if (linesCount !== studentLastReportedLines || isBingo !== studentLastReportedBingo) {
+    studentLastReportedLines = linesCount;
+    studentLastReportedBingo = isBingo;
+    
+    publishMessage(`bingo/${roomId}/student_status`, {
+      id: mqttClient.options.clientId,
+      name: username,
+      lines: linesCount,
+      bingo: isBingo
+    });
+  }
 }
 
 function closeBingoModal() {
