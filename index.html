@@ -31,7 +31,12 @@
             👑 建立房間 (老師)
           </button>
           <button class="btn btn-student" onclick="navigateTo('screen-student-join')">
-          <!-- ================= SCREEN 2: TEACHER SETUP ================= -->
+            🎒 加入遊戲 (學生)
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 2: TEACHER SETUP ================= -->
       <div id="screen-teacher-setup" class="screen">
         <h1 class="title">建立賓果房間</h1>
         
@@ -46,9 +51,64 @@
             <button class="selector-btn" data-value="zhuyin">🗣️ 注音</button>
           </div>
           
-          <div id="words-input-container" class="mt-4">
+          <!-- 🔢 數字設定 -->
+          <div id="numbers-input-container" class="setup-sub-container mt-4" style="display: none;">
+            <label class="form-label">設定數字範圍：</label>
+            <div class="range-input-row">
+              <input type="number" id="setup-number-min" class="form-input text-center bold" value="1" min="1">
+              <span class="range-separator">~</span>
+              <input type="number" id="setup-number-max" class="form-input text-center bold" value="25" min="1">
+            </div>
+            <div class="warning-text" id="numbers-range-warning" style="color: #627d98; font-weight: normal; margin-top: 6px;">* 建議範圍至少包含 25 個數字</div>
+          </div>
+
+          <!-- 📝 語詞設定 -->
+          <div id="words-input-container" class="setup-sub-container mt-4">
             <label class="form-label">輸入語詞 (用逗號隔開)：</label>
             <textarea class="custom-word-input" id="setup-custom-words" placeholder="例如：蘋果, 香蕉, 橘子, 西瓜..."></textarea>
+          </div>
+
+          <!-- 🎨 圖案設定 -->
+          <div id="patterns-input-container" class="setup-sub-container mt-4" style="display: none;">
+            <label class="form-label">選擇圖案主題 (可多選)：</label>
+            <div class="checkbox-group-row">
+              <div class="checkbox-container">
+                <input type="checkbox" class="checkbox-input pattern-theme-checkbox" id="pattern-theme-animals" checked>
+                <div class="checkbox-label">🐶 可愛動物</div>
+              </div>
+              <div class="checkbox-container">
+                <input type="checkbox" class="checkbox-input pattern-theme-checkbox" id="pattern-theme-fruits">
+                <div class="checkbox-label">🍎 新鮮水果</div>
+              </div>
+              <div class="checkbox-container">
+                <input type="checkbox" class="checkbox-input pattern-theme-checkbox" id="pattern-theme-weather">
+                <div class="checkbox-label">☀️ 天氣變化</div>
+              </div>
+              <div class="checkbox-container">
+                <input type="checkbox" class="checkbox-input pattern-theme-checkbox" id="pattern-theme-vehicles">
+                <div class="checkbox-label">🚗 交通工具</div>
+              </div>
+            </div>
+            <div class="emoji-preview-container mt-3">
+              <span id="patterns-preview-list" class="emoji-preview-list">🐶 🐱 🦁 🐯 🐼 🐨 🐻 ...</span>
+            </div>
+          </div>
+
+          <!-- 🔤 字母設定 -->
+          <div id="alphabet-input-container" class="setup-sub-container mt-4" style="display: none;">
+            <label class="form-label">選擇字母大小寫：</label>
+            <select class="form-select" id="setup-alphabet-case">
+              <option value="uppercase" selected>大寫 (A-Z)</option>
+              <option value="lowercase">小寫 (a-z)</option>
+            </select>
+          </div>
+
+          <!-- 🗣️ 注音設定 -->
+          <div id="zhuyin-input-container" class="setup-sub-container mt-4" style="display: none;">
+            <div class="zhuyin-info-box">
+              <p class="zhuyin-info-title bold text-center">系統將自動打亂 37 個注音符號</p>
+              <p id="zhuyin-preview-list" class="zhuyin-preview-text text-center mt-2">ㄅ ㄆ ㄇ ㄈ ㄉ ㄊ ㄋ ㄌ ㄍ ㄎ ㄏ ...</p>
+            </div>
           </div>
         </div>
 
@@ -138,7 +198,6 @@
           <button class="btn btn-accent" onclick="drawWordRandomly()">🎲 隨機抽一個詞</button>
         </div>
 
-
         <div class="board-ranking">
           <div class="form-label" style="margin-bottom: 8px;">📊 學生即時連線排行與 Bingo 狀態</div>
           <div id="ranking-list">
@@ -153,9 +212,9 @@
 
       <!-- ================= SCREEN 5: STUDENT JOIN ================= -->
       <div id="screen-student-join" class="screen">
-        <h1 class="title" id="student-join-title">加入賓果遊戲</h1>
+        <h1 class="title" id="student-join-title" style="display: none;">加入賓果遊戲</h1>
         
-        <div class="form-group" id="student-room-group">
+        <div class="form-group" id="student-room-group" style="display: none;">
           <label class="form-label">輸入 4 位數房號</label>
           <input type="number" class="form-input text-center bold" id="student-room-input" placeholder="例如：1234" oninput="if(value.length>4)value=value.slice(0,4)">
         </div>
@@ -165,9 +224,9 @@
           <input type="number" class="form-input text-center bold" id="student-name-input" placeholder="例如：12" min="1" max="99" oninput="if(value.length>2)value=value.slice(0,2)">
         </div>
 
-        <button class="btn btn-student" id="btn-student-join-game" onclick="joinRoom()">加入遊戲</button>
+        <button class="btn btn-student" id="btn-student-join-game" onclick="joinRoom()">開始遊戲</button>
         
-        <div class="text-center" id="student-back-btn-container">
+        <div class="text-center" id="student-back-btn-container" style="display: none;">
           <span class="back-link" onclick="navigateTo('screen-welcome')">返回首頁</span>
         </div>
       </div>

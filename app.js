@@ -25,15 +25,10 @@ let studentDrawnWords = new Set(); // words drawn by teacher
 let studentHasWon = false;
 let studentHasFreeSpace = false;
 
-// Standard Word Pools
+// Standard Word Pools & Themes
 const WORD_POOLS = {
   numbers: [], // Will generate dynamically based on size
-  patterns: [
-    "🚗", "🍎", "🐶", "⚽", "🍕", "🐱", "🚀", "🎸", "🎈", "🍔", 
-    "🍦", "🦁", "🐼", "🦄", "🍓", "🍩", "⏰", "🧸", "🎨", "🧩", 
-    "🎲", "🎧", "📷", "💡", "✈️", "🚢", "🌈", "🍉", "🍒", "🥕", 
-    "🥑", "🧁", "🍿", "🍪", "🍩", "🍭"
-  ],
+  patterns: [], // Will generate based on selected categories
   alphabet: [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
@@ -44,6 +39,13 @@ const WORD_POOLS = {
     "ㄛ", "ㄜ", "ㄝ", "ㄞ", "ㄟ", "ㄠ", "ㄡ", "ㄢ", "ㄣ", "ㄤ", "ㄥ", "ㄦ",
     "ㄧ", "ㄨ", "ㄩ"
   ]
+};
+
+const PATTERN_THEMES = {
+  animals: ["🐶","🐱","🦁","🐯","🐼","🐨","🐻","🦊","🐰","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐙","🦑","🦞","🦀","🐠"],
+  fruits: ["🍎","🍏","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶️","🌽","🥕","🥔","🍠","🥐","🍞"],
+  weather: ["☀️","🌤️","⛅","🌥️","☁️","🌦️","🌧️","⛈️","🌩️","🌨️","❄️","💨","💧","⚡","🌈","🌊","🌀","☄️","🔥","🌟","🌙","🪐","🌍","✨","⚡","☔","☂️","🌫️","🌁","🌌"],
+  vehicles: ["🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🚲","🛵","🏍️","🛺","🚃","🚋","🚂","🚇","🚊","🚁","✈️","🚀","🛸","⛵","🚢","⚓"]
 };
 
 // MQTT Configurations
@@ -70,7 +72,13 @@ function navigateTo(screenId) {
 function setupUIEvents() {
   // 1. Content Type Selector
   const typeBtns = document.querySelectorAll("#setup-content-type .selector-btn");
-  const wordsContainer = document.getElementById("words-input-container");
+  const containers = {
+    numbers: document.getElementById("numbers-input-container"),
+    words: document.getElementById("words-input-container"),
+    patterns: document.getElementById("patterns-input-container"),
+    alphabet: document.getElementById("alphabet-input-container"),
+    zhuyin: document.getElementById("zhuyin-input-container")
+  };
   
   typeBtns.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -78,13 +86,55 @@ function setupUIEvents() {
       btn.classList.add("selected");
       teacherContentType = btn.getAttribute("data-value");
       
-      if (teacherContentType === "words") {
-        wordsContainer.style.display = "block";
-      } else {
-        wordsContainer.style.display = "none";
-      }
+      // Toggle visibility of each container
+      Object.keys(containers).forEach(key => {
+        if (containers[key]) {
+          containers[key].style.display = (key === teacherContentType) ? "block" : "none";
+        }
+      });
     });
   });
+
+  // Patterns checkbox theme preview logic
+  function updatePatternPreview() {
+    const previewEl = document.getElementById("patterns-preview-list");
+    if (!previewEl) return;
+    
+    let selectedEmojis = [];
+    if (document.getElementById("pattern-theme-animals").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.animals);
+    }
+    if (document.getElementById("pattern-theme-fruits").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.fruits);
+    }
+    if (document.getElementById("pattern-theme-weather").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.weather);
+    }
+    if (document.getElementById("pattern-theme-vehicles").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.vehicles);
+    }
+    
+    if (selectedEmojis.length === 0) {
+      previewEl.textContent = "（請選擇主題）";
+    } else {
+      previewEl.textContent = selectedEmojis.join(" ");
+    }
+  }
+
+  // Hook event listeners to pattern checkboxes
+  const patternCheckboxes = document.querySelectorAll(".pattern-theme-checkbox");
+  patternCheckboxes.forEach(cb => {
+    cb.addEventListener("change", updatePatternPreview);
+  });
+  
+  // Initialize pattern preview
+  updatePatternPreview();
+
+  // Initialize zhuyin preview
+  const zhuyinPreview = document.getElementById("zhuyin-preview-list");
+  if (zhuyinPreview) {
+    zhuyinPreview.textContent = WORD_POOLS.zhuyin.join(" ");
+  }
 
   // 2. Grid Size Selector (3x3, 4x4, 5x5)
   const sizeBtns = document.querySelectorAll("#setup-grid-size-new .selector-btn");
@@ -174,19 +224,70 @@ function createRoom() {
     }
   } 
   else if (teacherContentType === "numbers") {
-    // Generate numbers from 1 to GridSize * GridSize + 10 for more randomization
-    const maxNum = minNeeded + 10;
-    teacherWordPool = Array.from({ length: maxNum }, (_, i) => (i + 1).toString());
-  } 
-  else {
-    // Standard pool (patterns, alphabet, zhuyin)
-    const pool = [...WORD_POOLS[teacherContentType]];
-    if (pool.length < minNeeded) {
-      // Fallback or pad if needed (though our predefines have enough)
-      alert(`詞庫池數量不足（目前只有 ${pool.length} 個）。`);
+    const minVal = parseInt(document.getElementById("setup-number-min").value);
+    const maxVal = parseInt(document.getElementById("setup-number-max").value);
+    if (isNaN(minVal) || isNaN(maxVal)) {
+      alert("請輸入正確的數字範圍！");
       return;
     }
-    teacherWordPool = pool;
+    if (minVal > maxVal) {
+      alert("開始數字不能大於結束數字！");
+      return;
+    }
+    const count = maxVal - minVal + 1;
+    if (count < minNeeded) {
+      alert(`數字範圍數量不足！${teacherGridSize}x${teacherGridSize} 網格至少需要 ${minNeeded} 個數字（目前範圍內只有 ${count} 個數字）。`);
+      return;
+    }
+    teacherWordPool = Array.from({ length: count }, (_, i) => (minVal + i).toString());
+  } 
+  else if (teacherContentType === "patterns") {
+    let selectedEmojis = [];
+    if (document.getElementById("pattern-theme-animals").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.animals);
+    }
+    if (document.getElementById("pattern-theme-fruits").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.fruits);
+    }
+    if (document.getElementById("pattern-theme-weather").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.weather);
+    }
+    if (document.getElementById("pattern-theme-vehicles").checked) {
+      selectedEmojis = selectedEmojis.concat(PATTERN_THEMES.vehicles);
+    }
+    
+    if (selectedEmojis.length === 0) {
+      alert("請至少選擇一個圖案主題！");
+      return;
+    }
+    
+    if (selectedEmojis.length < minNeeded) {
+      alert(`圖案數量不足！目前選擇的主題總共只有 ${selectedEmojis.length} 個圖案，但 ${teacherGridSize}x${teacherGridSize} 網格需要至少 ${minNeeded} 個。`);
+      return;
+    }
+    
+    // Use unique emojis and shuffle them
+    teacherWordPool = [...new Set(selectedEmojis)].sort(() => 0.5 - Math.random());
+  }
+  else if (teacherContentType === "alphabet") {
+    const alphabetCase = document.getElementById("setup-alphabet-case").value;
+    if (alphabetCase === "lowercase") {
+      teacherWordPool = WORD_POOLS.alphabet.map(letter => letter.toLowerCase());
+    } else {
+      teacherWordPool = [...WORD_POOLS.alphabet];
+    }
+    
+    if (teacherWordPool.length < minNeeded) {
+      alert(`字母數量不足！英文字母只有 26 個，不夠填滿 ${teacherGridSize}x${teacherGridSize} 的賓果盤。`);
+      return;
+    }
+  }
+  else if (teacherContentType === "zhuyin") {
+    teacherWordPool = [...WORD_POOLS.zhuyin];
+    if (teacherWordPool.length < minNeeded) {
+      alert(`注音符號數量不足！注音符號只有 37 個，不夠填滿 ${teacherGridSize}x${teacherGridSize} 的賓果盤。`);
+      return;
+    }
   }
 
   // 2. Generate random 4-digit room ID
@@ -277,12 +378,29 @@ function startBingoGame() {
   navigateTo("screen-teacher-game");
 }
 
+// Speak a word out loud using Web Speech API
+function speakWord(word) {
+  if ('speechSynthesis' in window) {
+    // Cancel ongoing speech to prevent queue build-up
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 0.85; // Slightly slower for classroom clarity
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 // Draw a word
 function drawWord(word) {
   if (teacherDrawnWords.includes(word)) return; // already drawn
   
   teacherDrawnWords.push(word);
   document.getElementById("last-drawn-word").textContent = word;
+
+  // Speak drawn word
+  speakWord(word);
 
   // Broadcast drawn word
   publishMessage(`bingo/${roomId}/teacher_events`, {
@@ -359,8 +477,8 @@ function joinRoom() {
   const roomInput = document.getElementById("student-room-input").value.trim();
   const nameInput = document.getElementById("student-name-input").value.trim();
 
-  if (roomInput.length !== 4) {
-    alert("請輸入正確的 4 位數房號！");
+  if (!roomInput || roomInput.length !== 4) {
+    alert("找不到遊戲房號！請使用平板重新掃描老師畫面的二維條碼 (QR Code) 加入遊戲。");
     return;
   }
   if (!nameInput) {
