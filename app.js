@@ -132,6 +132,11 @@ function checkUrlParams() {
   if (roomParam) {
     navigateTo("screen-student-join");
     document.getElementById("student-room-input").value = roomParam;
+    
+    // Make the page extremely clean (only show seat number input and join button)
+    document.getElementById("student-join-title").style.display = "none";
+    document.getElementById("student-room-group").style.display = "none";
+    document.getElementById("student-back-btn-container").style.display = "none";
   }
 }
 
@@ -381,12 +386,12 @@ function joinRoom() {
     return;
   }
   if (!nameInput) {
-    alert("請輸入您的名字！");
+    alert("請輸入您的座號！");
     return;
   }
 
   roomId = roomInput;
-  username = nameInput;
+  username = nameInput + " 號"; // Auto append "號" to seat number
 
   document.getElementById("lobby-room-id-s").textContent = roomId;
   document.getElementById("student-name-badge").textContent = username;

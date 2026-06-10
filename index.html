@@ -159,21 +159,21 @@
 
       <!-- ================= SCREEN 5: STUDENT JOIN ================= -->
       <div id="screen-student-join" class="screen">
-        <h1 class="title">加入賓果遊戲</h1>
+        <h1 class="title" id="student-join-title">加入賓果遊戲</h1>
         
-        <div class="form-group">
+        <div class="form-group" id="student-room-group">
           <label class="form-label">輸入 4 位數房號</label>
           <input type="number" class="form-input text-center bold" id="student-room-input" placeholder="例如：1234" oninput="if(value.length>4)value=value.slice(0,4)">
         </div>
 
-        <div class="form-group">
-          <label class="form-label">輸入您的名字</label>
-          <input type="text" class="form-input text-center bold" id="student-name-input" placeholder="例如：小明" maxlength="10">
+        <div class="form-group" id="student-name-group">
+          <label class="form-label" id="student-name-label">輸入座號</label>
+          <input type="number" class="form-input text-center bold" id="student-name-input" placeholder="例如：12" min="1" max="99" oninput="if(value.length>2)value=value.slice(0,2)">
         </div>
 
-        <button class="btn btn-student" onclick="joinRoom()">🎮 進入準備大廳</button>
+        <button class="btn btn-student" id="btn-student-join-game" onclick="joinRoom()">加入遊戲</button>
         
-        <div class="text-center">
+        <div class="text-center" id="student-back-btn-container">
           <span class="back-link" onclick="navigateTo('screen-welcome')">返回首頁</span>
         </div>
       </div>
