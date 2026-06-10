@@ -1,0 +1,575 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+:root {
+  --bg-color: #fdfaf4;
+  --card-bg: #ffffff;
+  --text-dark: #2d3748;
+  --border-color: #334e68;
+  
+  --teacher-color: #ff9e9e;
+  --teacher-hover: #ff8585;
+  --student-color: #a3d2ff;
+  --student-hover: #80bfff;
+  
+  --primary-accent: #6c5ce7;
+  --primary-hover: #5b4bc4;
+  --success-color: #2ecc71;
+  --wrong-color: #e74c3c;
+  
+  --card-shadow: 0 10px 30px rgba(51, 78, 104, 0.08), 0 1px 3px rgba(51, 78, 104, 0.05);
+  --btn-shadow: 0 4px 0px var(--border-color);
+  --btn-shadow-active: 0 1px 0px var(--border-color);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  overflow-x: hidden;
+}
+
+/* Background Gradients decoration */
+.bg-glow-1, .bg-glow-2 {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: -1;
+  opacity: 0.5;
+}
+.bg-glow-1 {
+  background: radial-gradient(circle, #fff3b0 0%, transparent 70%);
+  top: 10%;
+  left: 10%;
+}
+.bg-glow-2 {
+  background: radial-gradient(circle, #ffccd5 0%, transparent 70%);
+  bottom: 10%;
+  right: 10%;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Base Card Style */
+.card {
+  background: var(--card-bg);
+  border: 4px solid var(--border-color);
+  border-radius: 28px;
+  padding: 32px 24px;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Corner Highlights inside card */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(255, 243, 176, 0.8) 0%, transparent 70%);
+  pointer-events: none;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(255, 204, 213, 0.8) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Headings */
+.title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 28px;
+  color: var(--border-color);
+  text-shadow: 2px 2px 0px rgba(255, 179, 179, 0.6), -2px -2px 0px rgba(179, 217, 255, 0.6);
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  text-align: center;
+  color: #627d98;
+  margin-bottom: 24px;
+}
+
+/* Buttons */
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  border: 4px solid var(--border-color);
+  border-radius: 20px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+  box-shadow: var(--btn-shadow);
+  background-color: #f0f4f8;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0px var(--border-color);
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--btn-shadow-active);
+}
+
+.btn-teacher {
+  background-color: var(--teacher-color);
+}
+.btn-teacher:hover {
+  background-color: var(--teacher-hover);
+}
+
+.btn-student {
+  background-color: var(--student-color);
+}
+.btn-student:hover {
+  background-color: var(--student-hover);
+}
+
+.btn-accent {
+  background-color: #bfa3ff;
+}
+.btn-accent:hover {
+  background-color: #ac87ff;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  color: white;
+}
+.btn-success:hover {
+  background-color: #27ae60;
+}
+
+/* Screen Transitions */
+.screen {
+  display: none;
+}
+.screen.active {
+  display: block;
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-label {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--border-color);
+}
+.form-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  border: 4px solid var(--border-color);
+  border-radius: 16px;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+.form-input:focus {
+  border-color: var(--primary-accent);
+}
+.form-select {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  border: 4px solid var(--border-color);
+  border-radius: 16px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2724%27%20height%3D%2724%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27%23334e68%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpolyline%20points%3D%276%209%2012%2015%2018%209%27%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 16px;
+}
+
+/* Grid Options (3x3, 4x4, 5x5) */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.option-box {
+  border: 4px solid var(--border-color);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.option-box.selected {
+  background-color: var(--student-color);
+  transform: scale(1.05);
+}
+
+/* Lobby QR area */
+.lobby-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.room-badge {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: #f0f4f8;
+  border: 3px solid var(--border-color);
+  padding: 6px 20px;
+  border-radius: 50px;
+  color: var(--primary-accent);
+}
+.qr-container {
+  border: 4px solid var(--border-color);
+  padding: 12px;
+  border-radius: 20px;
+  background: white;
+  display: inline-block;
+}
+.join-url {
+  font-size: 0.9rem;
+  color: #627d98;
+  word-break: break-all;
+  text-align: center;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
+  width: 100%;
+}
+
+/* Student List in Lobby */
+.student-list-container {
+  border: 4px solid var(--border-color);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 24px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.student-list-title {
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+.student-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.student-badge {
+  background: #e1f5fe;
+  border: 2px solid #81d4fa;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Layout for game screens (Teacher / Student) */
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Bingo Grid (Student Board) */
+.bingo-board-container {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bingo-board {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 8px;
+  background: #e2e8f0;
+  border: 4px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px;
+}
+.bingo-cell {
+  background: white;
+  border: 3px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 4px;
+  cursor: pointer;
+  user-select: none;
+  word-break: break-all;
+  line-height: 1.2;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.bingo-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--border-color);
+}
+.bingo-cell.marked {
+  background-color: var(--student-color);
+  color: var(--text-dark);
+  transform: scale(0.96);
+  box-shadow: none;
+}
+.bingo-cell.caller-drawn {
+  background-color: var(--teacher-color);
+  color: var(--text-dark);
+}
+.bingo-cell.marked.caller-drawn {
+  background-color: #bbf7d0; /* Success green highlight */
+  border-color: var(--success-color);
+}
+.bingo-cell.center-free {
+  background-color: #fef3c7; /* Gold */
+}
+
+/* Word Draw Dashboard (Teacher Game) */
+.word-pool-section {
+  border: 4px solid var(--border-color);
+  border-radius: 20px;
+  padding: 16px;
+  background: #f8fafc;
+}
+.word-pool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.word-pool-item {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: white;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  word-break: break-all;
+}
+.word-pool-item:hover {
+  background-color: #edf2f7;
+}
+.word-pool-item.drawn {
+  background-color: var(--teacher-color);
+  color: var(--text-dark);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Drawn Word Indicator Display */
+.last-drawn-display {
+  text-align: center;
+  padding: 16px;
+  background: #fffbeb;
+  border: 4px dashed #f59e0b;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+.last-drawn-word {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #d97706;
+  margin-top: 4px;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Real-time board ranking for Teacher */
+.board-ranking {
+  border: 4px solid var(--border-color);
+  border-radius: 20px;
+  padding: 16px;
+}
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 2px solid #edf2f7;
+  font-weight: 700;
+}
+.ranking-item:last-child {
+  border-bottom: none;
+}
+.ranking-item.winner {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 8px;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 0 0px rgba(46, 204, 113, 0.4); }
+  to { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+}
+
+/* Status Bar & Logs */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4a5568;
+  margin-bottom: 12px;
+  background: #edf2f7;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+/* Confetti Canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Modal Overlay (e.g. for game-over or alerts) */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(51, 78, 104, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: white;
+  border: 4px solid var(--border-color);
+  border-radius: 28px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+/* Custom word list input area */
+.custom-word-input {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 4px solid var(--border-color);
+  border-radius: 12px;
+  outline: none;
+  resize: none;
+  margin-top: 6px;
+}
+
+/* Back button */
+.back-link {
+  display: inline-block;
+  color: #627d98;
+  font-weight: 700;
+  margin-top: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.back-link:hover {
+  color: var(--text-dark);
+}
+
+/* Helpers */
+.text-center { text-align: center; }
+.mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
+.bold { font-weight: 700; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.badge {
+  background: var(--primary-accent);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
