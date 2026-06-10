@@ -7,37 +7,43 @@ let roomId = null;
 let username = null;
 
 // Teacher State
-let teacherGridSize = 5;
+let teacherGridSize = 4; // Default to 4 in new mockup
 let teacherTargetLines = 2;
 let teacherWordPool = [];
 let teacherDrawnWords = [];
 let teacherStudents = {}; // id -> { name, lines, bingo }
+let teacherContentType = "words"; // default to words
+let teacherHasFreeSpace = false;
+let teacherExpectedStudents = 28;
 
 // Student State
-let studentGridSize = 5;
+let studentGridSize = 4;
 let studentTargetLines = 2;
 let studentBoardWords = []; // flat array of words on student's board
 let studentMarkedIndices = new Set(); // indices of cells clicked by student
 let studentDrawnWords = new Set(); // words drawn by teacher
 let studentHasWon = false;
+let studentHasFreeSpace = false;
 
 // Standard Word Pools
 const WORD_POOLS = {
-  math: [
-    "因數", "倍數", "最大公因數", "最小公倍數", "質數", "合數", "短除法", 
-    "長方體", "正方體", "表面積", "展開圖", "體積", "容積", "公升", "毫升", 
-    "百分率", "折線圖", "圓形圖", "線對稱", "對稱軸", "對稱點", "對稱邊", 
-    "對稱角", "小數點", "十進位", "比率", "母數", "子數", "長度", "面積", 
-    "公頃", "公畝", "平方公尺"
+  numbers: [], // Will generate dynamically based on size
+  patterns: [
+    "🚗", "🍎", "🐶", "⚽", "🍕", "🐱", "🚀", "🎸", "🎈", "🍔", 
+    "🍦", "🦁", "🐼", "🦄", "🍓", "🍩", "⏰", "🧸", "🎨", "🧩", 
+    "🎲", "🎧", "📷", "💡", "✈️", "🚢", "🌈", "🍉", "🍒", "🥕", 
+    "🥑", "🧁", "🍿", "🍪", "🍩", "🍭"
   ],
-  english: [
-    "Apple", "Banana", "Orange", "Cat", "Dog", "Elephant", "Fox", "Giraffe", 
-    "Horse", "Ice cream", "Jellyfish", "Kangaroo", "Lion", "Monkey", "Nest", 
-    "Owl", "Penguin", "Queen", "Rabbit", "Snake", "Tiger", "Umbrella", "Violin", 
-    "Whale", "Xylophone", "Yo-yo", "Zebra", "Happy", "School", "Teacher", 
-    "Student", "Book", "Computer"
+  alphabet: [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
   ],
-  numbers: Array.from({ length: 30 }, (_, i) => (i + 1).toString())
+  zhuyin: [
+    "ㄅ", "ㄆ", "ㄇ", "ㄈ", "ㄉ", "ㄊ", "ㄋ", "ㄌ", "ㄍ", "ㄎ", "ㄏ", 
+    "ㄐ", "ㄑ", "ㄒ", "ㄓ", "ㄔ", "ㄕ", "ㄖ", "ㄗ", "ㄘ", "ㄙ", "ㄚ", 
+    "ㄛ", "ㄜ", "ㄝ", "ㄞ", "ㄟ", "ㄠ", "ㄡ", "ㄢ", "ㄣ", "ㄤ", "ㄥ", "ㄦ",
+    "ㄧ", "ㄨ", "ㄩ"
+  ]
 };
 
 // MQTT Configurations
@@ -62,26 +68,61 @@ function navigateTo(screenId) {
 
 // Set up UI Event listeners
 function setupUIEvents() {
-  // Teacher setup grid size selector
-  const gridBoxes = document.querySelectorAll("#setup-grid-size .option-box");
-  gridBoxes.forEach(box => {
-    box.addEventListener("click", () => {
-      gridBoxes.forEach(b => b.classList.remove("selected"));
-      box.classList.add("selected");
-      teacherGridSize = parseInt(box.getAttribute("data-value"));
+  // 1. Content Type Selector
+  const typeBtns = document.querySelectorAll("#setup-content-type .selector-btn");
+  const wordsContainer = document.getElementById("words-input-container");
+  
+  typeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      typeBtns.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      teacherContentType = btn.getAttribute("data-value");
+      
+      if (teacherContentType === "words") {
+        wordsContainer.style.display = "block";
+      } else {
+        wordsContainer.style.display = "none";
+      }
+    });
+  });
+
+  // 2. Grid Size Selector (3x3, 4x4, 5x5)
+  const sizeBtns = document.querySelectorAll("#setup-grid-size-new .selector-btn");
+  const freeCheckbox = document.getElementById("setup-free-space");
+  const warningText = document.getElementById("free-space-warning");
+
+  sizeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      sizeBtns.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      teacherGridSize = parseInt(btn.getAttribute("data-value"));
+
+      if (teacherGridSize === 4) {
+        // Disable free space checkbox and uncheck it
+        freeCheckbox.disabled = true;
+        freeCheckbox.checked = false;
+        teacherHasFreeSpace = false;
+        warningText.style.display = "block";
+      } else {
+        // Enable free space checkbox
+        freeCheckbox.disabled = false;
+        warningText.style.display = "none";
+      }
     });
   });
 }
 
-// Show/Hide custom word input based on pool selection
-function onWordPoolChange() {
-  const pool = document.getElementById("setup-word-pool").value;
-  const customContainer = document.getElementById("custom-words-container");
-  if (pool === "custom") {
-    customContainer.style.display = "block";
-  } else {
-    customContainer.style.display = "none";
+// Helper to handle Free Space checkbox click via container click (mockup compatibility)
+function toggleFreeSpaceCheckbox(event) {
+  const checkbox = document.getElementById("setup-free-space");
+  if (checkbox.disabled) return;
+  
+  // If clicked directly on checkbox, let it propagate normally.
+  // Otherwise, if clicked on container, toggle the checkbox manually.
+  if (event.target !== checkbox) {
+    checkbox.checked = !checkbox.checked;
   }
+  teacherHasFreeSpace = checkbox.checked;
 }
 
 // Check if room ID is passed in URL (for students scanning QR code)
@@ -106,27 +147,41 @@ function createRoom() {
   const winLinesSelect = document.getElementById("setup-win-lines");
   teacherTargetLines = parseInt(winLinesSelect.value);
   
-  const poolSelect = document.getElementById("setup-word-pool").value;
-  if (poolSelect === "custom") {
-    const rawCustom = document.getElementById("setup-custom-words").value.trim();
-    if (!rawCustom) {
-      alert("請輸入您的自訂詞彙！");
+  const studentCountInput = document.getElementById("setup-student-count-input");
+  teacherExpectedStudents = parseInt(studentCountInput.value) || 28;
+  
+  const freeCheckbox = document.getElementById("setup-free-space");
+  teacherHasFreeSpace = freeCheckbox.checked;
+
+  const minNeeded = teacherGridSize * teacherGridSize;
+
+  // Generate word pool based on Content Type
+  if (teacherContentType === "words") {
+    const rawWords = document.getElementById("setup-custom-words").value.trim();
+    if (!rawWords) {
+      alert("請輸入您的語詞清單！");
       return;
     }
-    // split by comma or whitespace
-    teacherWordPool = rawCustom.split(/[,，\n]+/).map(w => w.trim()).filter(w => w.length > 0);
-    const minNeeded = teacherGridSize * teacherGridSize;
+    teacherWordPool = rawWords.split(/[,，\n]+/).map(w => w.trim()).filter(w => w.length > 0);
     if (teacherWordPool.length < minNeeded) {
-      alert(`詞彙數量不足！${teacherGridSize}x${teacherGridSize} 網格至少需要 ${minNeeded} 個詞彙（目前只有 ${teacherWordPool.length} 個）。`);
+      alert(`語詞數量不足！${teacherGridSize}x${teacherGridSize} 網格至少需要 ${minNeeded} 個語詞（目前只有 ${teacherWordPool.length} 個）。`);
       return;
     }
-  } else {
-    teacherWordPool = [...WORD_POOLS[poolSelect]];
-    // Adjust numbers pool size to match grid size to prevent confusion
-    if (poolSelect === "numbers") {
-      const totalCells = teacherGridSize * teacherGridSize;
-      teacherWordPool = Array.from({ length: totalCells + 5 }, (_, i) => (i + 1).toString());
+  } 
+  else if (teacherContentType === "numbers") {
+    // Generate numbers from 1 to GridSize * GridSize + 10 for more randomization
+    const maxNum = minNeeded + 10;
+    teacherWordPool = Array.from({ length: maxNum }, (_, i) => (i + 1).toString());
+  } 
+  else {
+    // Standard pool (patterns, alphabet, zhuyin)
+    const pool = [...WORD_POOLS[teacherContentType]];
+    if (pool.length < minNeeded) {
+      // Fallback or pad if needed (though our predefines have enough)
+      alert(`詞庫池數量不足（目前只有 ${pool.length} 個）。`);
+      return;
     }
+    teacherWordPool = pool;
   }
 
   // 2. Generate random 4-digit room ID
@@ -135,7 +190,6 @@ function createRoom() {
   document.getElementById("game-room-id-t").textContent = roomId;
 
   // 3. Generate QR Code URL
-  // Generate a URL pointing to the student join page with room parameter
   const baseJoinUrl = window.location.origin + window.location.pathname + "?room=" + roomId;
   document.getElementById("lobby-join-url").textContent = baseJoinUrl;
   
@@ -158,7 +212,7 @@ function createRoom() {
       if (err) console.error("Subscribe status error", err);
     });
     
-    // Broadcast initial room heartbeat or setup
+    // Broadcast initial room heartbeat
     publishMessage(`bingo/${roomId}/room_heartbeat`, { type: "lobby" });
     
     navigateTo("screen-teacher-lobby");
@@ -205,7 +259,8 @@ function startBingoGame() {
     type: "start",
     size: teacherGridSize,
     target: teacherTargetLines,
-    wordPool: teacherWordPool
+    wordPool: teacherWordPool,
+    freeSpace: teacherHasFreeSpace
   };
   publishMessage(`bingo/${roomId}/teacher_events`, config);
 
@@ -360,17 +415,23 @@ function joinRoom() {
 }
 
 // Setup Student Grid Board once started by teacher
-function setupStudentBoard(size, pool) {
+function setupStudentBoard(size, pool, freeSpace) {
   studentGridSize = size;
+  studentHasFreeSpace = freeSpace;
   
   // Shuffle pool copy and take size*size elements
   let shuffledPool = [...pool].sort(() => 0.5 - Math.random());
   studentBoardWords = shuffledPool.slice(0, size * size);
 
-  // If size is 5x5, place FREE space in center (index 12, row 3 col 3)
-  if (size === 5) {
-    studentBoardWords[12] = "✨ FREE ✨";
-    studentMarkedIndices.add(12); // Auto marked
+  // Place FREE space if enabled
+  if (freeSpace) {
+    if (size === 5) {
+      studentBoardWords[12] = "✨ FREE ✨";
+      studentMarkedIndices.add(12); // Auto marked
+    } else if (size === 3) {
+      studentBoardWords[4] = "✨ FREE ✨";
+      studentMarkedIndices.add(4); // Auto marked
+    }
   }
 
   // Draw board in UI
@@ -604,7 +665,7 @@ function handleIncomingMessage(topic, payload) {
       if (payload.type === "start") {
         studentGridSize = payload.size;
         studentTargetLines = payload.target;
-        setupStudentBoard(payload.size, payload.wordPool);
+        setupStudentBoard(payload.size, payload.wordPool, payload.freeSpace);
       }
       else if (payload.type === "draw") {
         studentDrawnWords.add(payload.word);

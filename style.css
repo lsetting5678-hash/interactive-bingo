@@ -537,13 +537,97 @@ body {
 .custom-word-input {
   width: 100%;
   height: 100px;
-  padding: 10px;
-  font-size: 1rem;
+  padding: 14px;
+  font-size: 1.05rem;
   border: 4px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 16px;
   outline: none;
   resize: none;
-  margin-top: 6px;
+  margin-top: 12px;
+}
+
+/* Horizontal Selector Button Groups */
+.selector-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.selector-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 12px 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  border: 3px solid #cbd5e1;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-dark);
+}
+
+.selector-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.selector-btn.selected {
+  border-color: #ec4899;
+  background-color: #fdf2f8;
+  color: #db2777;
+}
+
+/* Checkbox Style */
+.checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #ec4899;
+}
+
+.checkbox-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.checkbox-subtext {
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  margin-top: 4px;
+}
+
+.warning-text {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+/* Expected students input */
+.student-count-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: center;
+  border: 4px solid var(--border-color);
+  border-radius: 16px;
+  outline: none;
+  background: #fff;
 }
 
 /* Back button */
@@ -573,3 +657,4 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
 }
+
